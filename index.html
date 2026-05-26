@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestor Igor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a18;min-height:100vh}
 header{background:#fff;border-bottom:1px solid #e5e5e0;padding:14px 24px;display:flex;align-items:center;gap:12px}
-header h1{font-size:16px;font-weight:600;color:#1a1a18}
+header h1{font-size:16px;font-weight:600}
 header span{font-size:12px;color:#888;background:#f0f0ea;padding:2px 8px;border-radius:20px}
-.container{max-width:960px;margin:0 auto;padding:20px 16px}
-.tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;padding:6px;border-radius:10px;border:1px solid #e5e5e0}
-.tab{flex:1;padding:8px;border-radius:7px;border:none;font-size:13px;cursor:pointer;background:transparent;color:#666;font-family:inherit;transition:all .15s;text-align:center}
+.container{max-width:980px;margin:0 auto;padding:20px 16px}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;padding:6px;border-radius:10px;border:1px solid #e5e5e0;overflow-x:auto}
+.tab{flex:1;min-width:80px;padding:8px;border-radius:7px;border:none;font-size:13px;cursor:pointer;background:transparent;color:#666;font-family:inherit;transition:all .15s;text-align:center;white-space:nowrap}
 .tab.active{background:#1a1a18;color:#fff;font-weight:500}
 .panel{display:none}.panel.active{display:block}
 .card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:16px 18px;margin-bottom:12px}
@@ -21,7 +22,10 @@ header span{font-size:12px;color:#888;background:#f0f0ea;padding:2px 8px;border-
 .metric{background:#f5f5f0;border-radius:8px;padding:12px 14px}
 .metric-label{font-size:11px;color:#888;margin-bottom:4px}
 .metric-value{font-size:20px;font-weight:600}
-.green{color:#0f6e56}.red{color:#993c1d}.amber{color:#854f0b}
+.green{color:#0f6e56}.red{color:#993c1d}.amber{color:#854f0b}.blue{color:#1a4e8a}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dash-grid .card{margin-bottom:0}
+.chart-wrap{position:relative;height:220px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-weight:500;color:#888;font-size:11px;padding:6px 8px;border-bottom:1px solid #f0f0ea}
 td{padding:8px 8px;border-bottom:1px solid #f5f5f0;vertical-align:top}
@@ -56,10 +60,12 @@ textarea{resize:vertical;min-height:60px}
 .icon-btn:hover{background:#fef0f0;color:#c04828}
 .summary-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f5f5f0}
 .summary-row:last-child{border-bottom:none;font-weight:600;padding-top:10px}
-.loading{text-align:center;padding:40px;color:#aaa;font-size:13px}
 .toast{position:fixed;bottom:24px;right:24px;background:#1a1a18;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}
 .toast.show{opacity:1}
-@media(max-width:600px){.row{flex-direction:column}.metric-grid{grid-template-columns:1fr 1fr}}
+.donut-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;justify-content:center}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+@media(max-width:640px){.dash-grid{grid-template-columns:1fr}.row{flex-direction:column}.metric-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -71,14 +77,40 @@ textarea{resize:vertical;min-height:60px}
 
 <div class="container">
   <div class="tabs">
-    <button class="tab active" onclick="showTab('financeiro')">💰 Financeiro</button>
+    <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+    <button class="tab" onclick="showTab('financeiro')">💰 Financeiro</button>
     <button class="tab" onclick="showTab('tarefas')">✅ Tarefas</button>
     <button class="tab" onclick="showTab('metas')">🎯 Metas</button>
     <button class="tab" onclick="showTab('agenda')">📅 Agenda</button>
   </div>
 
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard" class="panel active">
+    <div id="dash-metrics" class="metric-grid"></div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-title">Receitas x Despesas (mensal)</div>
+        <div class="chart-wrap"><canvas id="chart-mensal"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tarefas por status</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="chart-tasks"></canvas></div>
+        <div class="donut-legend" id="tasks-legend"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Receita por empresa</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="chart-empresas"></canvas></div>
+        <div class="donut-legend" id="empresas-legend"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Metas em andamento</div>
+        <div id="dash-metas"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- FINANCEIRO -->
-  <div id="tab-financeiro" class="panel active">
+  <div id="tab-financeiro" class="panel">
     <div id="fin-metrics" class="metric-grid"></div>
     <div class="card">
       <div class="card-title">Nova transação</div>
@@ -203,10 +235,9 @@ textarea{resize:vertical;min-height:60px}
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDzFrI9-1nFFzk1JVztoe8mdjfiFuK4QI0",
@@ -219,94 +250,188 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-// Estado local
 let state = { transacoes:[], tasks:[], metas:[], eventos:[] };
+let charts = {};
 
 // Toast
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// Status
-function setSyncStatus(msg, color='#888') {
-  const el = document.getElementById('sync-status');
-  el.textContent = msg; el.style.color = color;
+function setSyncStatus(msg,color='#888'){
+  const el=document.getElementById('sync-status');
+  el.textContent=msg; el.style.color=color;
 }
 
 // Utils
 function fmt(v){ return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return '-'; try{ return new Date(d+'T12:00').toLocaleDateString('pt-BR'); }catch(e){return d;} }
 function empresaTag(e){
-  const cls = e==='Mood Mentoria'?'tag-mood':e==='Conecta'?'tag-conecta':'tag-pessoal';
+  const cls=e==='Mood Mentoria'?'tag-mood':e==='Conecta'?'tag-conecta':'tag-pessoal';
   return `<span class="empresa-tag ${cls}">${e}</span>`;
 }
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
-// ---- TABS ----
-window.showTab = function(id) {
+// Tabs
+window.showTab = function(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  const map={financeiro:0,tarefas:1,metas:2,agenda:3};
+  const map={dashboard:0,financeiro:1,tarefas:2,metas:3,agenda:4};
   document.querySelectorAll('.tab')[map[id]].classList.add('active');
+  if(id==='dashboard') renderDashboard();
 };
 
-// ---- LOAD ALL ----
-async function loadAll() {
+// Load
+async function loadAll(){
   setSyncStatus('sincronizando...');
-  try {
-    const cols = ['transacoes','tasks','metas','eventos'];
-    for(const col of cols) {
-      const snap = await getDocs(collection(db, col));
-      state[col] = snap.docs.map(d=>({id:d.id,...d.data()}));
+  try{
+    for(const col of ['transacoes','tasks','metas','eventos']){
+      const snap=await getDocs(collection(db,col));
+      state[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
     }
-    setSyncStatus('● online', '#0f6e56');
+    setSyncStatus('● online','#0f6e56');
     render();
-  } catch(e) {
-    setSyncStatus('● offline', '#993c1d');
+  }catch(e){
+    setSyncStatus('● offline','#993c1d');
     console.error(e);
   }
 }
 
+// ---- DASHBOARD ----
+function renderDashboard(){
+  // Métricas
+  const rec=state.transacoes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+  const desp=state.transacoes.filter(t=>t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
+  const abertas=state.tasks.filter(t=>t.status==='aberto').length;
+  const feitas=state.tasks.filter(t=>t.status==='feito').length;
+  document.getElementById('dash-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Saldo total</div><div class="metric-value ${rec-desp>=0?'green':'red'}">${fmt(rec-desp)}</div></div>
+    <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green">${fmt(rec)}</div></div>
+    <div class="metric"><div class="metric-label">Despesas</div><div class="metric-value red">${fmt(desp)}</div></div>
+    <div class="metric"><div class="metric-label">Tarefas abertas</div><div class="metric-value amber">${abertas}</div></div>
+    <div class="metric"><div class="metric-label">Tarefas concluídas</div><div class="metric-value green">${feitas}</div></div>`;
+
+  // Gráfico mensal
+  const meses={};
+  state.transacoes.forEach(t=>{
+    if(!t.data) return;
+    const m=t.data.substring(0,7);
+    if(!meses[m]) meses[m]={rec:0,desp:0};
+    if(t.tipo==='receita') meses[m].rec+=t.valor;
+    else meses[m].desp+=t.valor;
+  });
+  const labels=Object.keys(meses).sort();
+  const mesesFmt=labels.map(m=>{ const[y,mo]=m.split('-'); return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][parseInt(mo)-1]+'/'+y.slice(2); });
+  destroyChart('mensal');
+  if(labels.length){
+    const ctx=document.getElementById('chart-mensal').getContext('2d');
+    charts['mensal']=new Chart(ctx,{
+      type:'bar',
+      data:{
+        labels: mesesFmt.length ? mesesFmt : ['Sem dados'],
+        datasets:[
+          {label:'Receitas',data:labels.map(m=>meses[m].rec),backgroundColor:'#d1f0e6',borderColor:'#0f6e56',borderWidth:1.5,borderRadius:4},
+          {label:'Despesas',data:labels.map(m=>meses[m].desp),backgroundColor:'#fde8e0',borderColor:'#993c1d',borderWidth:1.5,borderRadius:4}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{y:{ticks:{font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#f0f0ea'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
+    });
+  } else {
+    document.getElementById('chart-mensal').closest('.chart-wrap').innerHTML='<div class="empty">Nenhuma transação ainda.</div>';
+  }
+
+  // Gráfico tarefas donut
+  const tAberto=state.tasks.filter(t=>t.status==='aberto').length;
+  const tFazendo=state.tasks.filter(t=>t.status==='fazendo').length;
+  const tFeito=state.tasks.filter(t=>t.status==='feito').length;
+  destroyChart('tasks');
+  if(state.tasks.length){
+    const ctx2=document.getElementById('chart-tasks').getContext('2d');
+    charts['tasks']=new Chart(ctx2,{
+      type:'doughnut',
+      data:{labels:['Aberto','Fazendo','Feito'],datasets:[{data:[tAberto,tFazendo,tFeito],backgroundColor:['#e5e5e0','#bfd9f5','#c8eedd'],borderColor:['#aaa','#378add','#0f6e56'],borderWidth:1.5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}
+    });
+    document.getElementById('tasks-legend').innerHTML=
+      `<div class="legend-item"><div class="legend-dot" style="background:#e5e5e0;border:1px solid #aaa"></div>Aberto (${tAberto})</div>
+       <div class="legend-item"><div class="legend-dot" style="background:#bfd9f5;border:1px solid #378add"></div>Fazendo (${tFazendo})</div>
+       <div class="legend-item"><div class="legend-dot" style="background:#c8eedd;border:1px solid #0f6e56"></div>Feito (${tFeito})</div>`;
+  } else {
+    document.getElementById('chart-tasks').closest('.chart-wrap').innerHTML='<div class="empty">Nenhuma tarefa.</div>';
+  }
+
+  // Gráfico receita por empresa
+  const empRec={};
+  state.transacoes.filter(t=>t.tipo==='receita').forEach(t=>{ empRec[t.empresa]=(empRec[t.empresa]||0)+t.valor; });
+  destroyChart('empresas');
+  const empKeys=Object.keys(empRec);
+  if(empKeys.length){
+    const ctx3=document.getElementById('chart-empresas').getContext('2d');
+    const empColors={['Mood Mentoria']:{bg:'#dddcfc',border:'#3c3489'},['Conecta']:{bg:'#c8eedd',border:'#085041'},['Pessoal']:{bg:'#faeeda',border:'#633806'}};
+    charts['empresas']=new Chart(ctx3,{
+      type:'doughnut',
+      data:{
+        labels:empKeys,
+        datasets:[{data:empKeys.map(k=>empRec[k]),backgroundColor:empKeys.map(k=>empColors[k]?.bg||'#ddd'),borderColor:empKeys.map(k=>empColors[k]?.border||'#aaa'),borderWidth:1.5}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}
+    });
+    document.getElementById('empresas-legend').innerHTML=empKeys.map(k=>`
+      <div class="legend-item"><div class="legend-dot" style="background:${empColors[k]?.bg};border:1px solid ${empColors[k]?.border}"></div>${k} (${fmt(empRec[k])})</div>`).join('');
+  } else {
+    document.getElementById('chart-empresas').closest('.chart-wrap').innerHTML='<div class="empty">Sem receitas lançadas.</div>';
+  }
+
+  // Metas no dashboard
+  const metasAtivas=state.metas.filter(m=>m.prog<m.alvo);
+  if(!metasAtivas.length){
+    document.getElementById('dash-metas').innerHTML='<div class="empty">Nenhuma meta em andamento.</div>';
+  } else {
+    document.getElementById('dash-metas').innerHTML=metasAtivas.map(m=>{
+      const pct=Math.min(100,Math.round((m.prog/m.alvo)*100));
+      const cor=pct>=100?'#1d9e75':pct>=60?'#ef9f27':'#378add';
+      const fv=v=>m.unidade==='R$'?fmt(v):`${Number(v).toLocaleString('pt-BR')} ${m.unidade}`;
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:13px;font-weight:500">${m.nome}</span>
+          <span style="font-size:12px;font-weight:600;color:${cor}">${pct}%</span>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-bottom:4px">${empresaTag(m.empresa)} &nbsp; ${fv(m.prog)} de ${fv(m.alvo)}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${cor}"></div></div>
+      </div>`;
+    }).join('');
+  }
+}
+
 // ---- FINANCEIRO ----
-window.addTransacao = async function() {
-  const desc = document.getElementById('fin-desc').value.trim();
-  const valor = parseFloat(document.getElementById('fin-valor').value);
-  if(!desc||isNaN(valor)||valor<=0){ alert('Preencha descrição e valor.'); return; }
-  const obj = {
-    empresa: document.getElementById('fin-empresa').value,
-    tipo: document.getElementById('fin-tipo').value,
-    desc, valor,
-    categoria: document.getElementById('fin-cat').value.trim(),
-    data: document.getElementById('fin-data').value || new Date().toISOString().split('T')[0],
-    criadoEm: Date.now()
-  };
-  setSyncStatus('salvando...');
-  const ref = await addDoc(collection(db,'transacoes'), obj);
+window.addTransacao = async function(){
+  const desc=document.getElementById('fin-desc').value.trim();
+  const valor=parseFloat(document.getElementById('fin-valor').value);
+  if(!desc||isNaN(valor)||valor<=0){alert('Preencha descrição e valor.');return;}
+  const obj={empresa:document.getElementById('fin-empresa').value,tipo:document.getElementById('fin-tipo').value,desc,valor,categoria:document.getElementById('fin-cat').value.trim(),data:document.getElementById('fin-data').value||new Date().toISOString().split('T')[0],criadoEm:Date.now()};
+  const ref=await addDoc(collection(db,'transacoes'),obj);
   state.transacoes.unshift({id:ref.id,...obj});
   ['fin-desc','fin-valor','fin-cat','fin-data'].forEach(id=>document.getElementById(id).value='');
-  setSyncStatus('● online','#0f6e56');
-  toast('Transação salva ✓');
-  renderFinanceiro();
+  toast('Transação salva ✓'); renderFinanceiro();
 };
 
-window.delTransacao = async function(id) {
+window.delTransacao = async function(id){
   await deleteDoc(doc(db,'transacoes',id));
-  state.transacoes = state.transacoes.filter(t=>t.id!==id);
-  toast('Removido');
-  renderFinanceiro();
+  state.transacoes=state.transacoes.filter(t=>t.id!==id);
+  toast('Removido'); renderFinanceiro();
 };
 
-function renderFinanceiro(){ renderMetrics(); renderExtrato(); renderResumo(); }
+function renderFinanceiro(){renderMetrics();renderExtrato();renderResumo();}
 
 function renderMetrics(){
-  const rec = state.transacoes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
-  const desp = state.transacoes.filter(t=>t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
-  const saldo = rec-desp;
-  const mood = state.transacoes.filter(t=>t.empresa==='Mood Mentoria'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
-  const con = state.transacoes.filter(t=>t.empresa==='Conecta'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+  const rec=state.transacoes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+  const desp=state.transacoes.filter(t=>t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
+  const saldo=rec-desp;
+  const mood=state.transacoes.filter(t=>t.empresa==='Mood Mentoria'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+  const con=state.transacoes.filter(t=>t.empresa==='Conecta'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
   document.getElementById('fin-metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green">${fmt(rec)}</div></div>
     <div class="metric"><div class="metric-label">Despesas</div><div class="metric-value red">${fmt(desp)}</div></div>
@@ -323,7 +448,8 @@ function renderExtrato(){
   document.getElementById('extrato-body').innerHTML=`<table>
     <tr><th>Data</th><th>Empresa</th><th>Descrição</th><th>Tipo</th><th style="text-align:right">Valor</th><th></th></tr>
     ${list.map(t=>`<tr>
-      <td>${fmtDate(t.data)}</td><td>${empresaTag(t.empresa)}</td><td>${t.desc}${t.categoria?`<br><span style="font-size:11px;color:#aaa">${t.categoria}</span>`:''}</td>
+      <td>${fmtDate(t.data)}</td><td>${empresaTag(t.empresa)}</td>
+      <td>${t.desc}${t.categoria?`<br><span style="font-size:11px;color:#aaa">${t.categoria}</span>`:''}</td>
       <td><span class="badge ${t.tipo}">${t.tipo}</span></td>
       <td style="text-align:right;font-weight:600;color:${t.tipo==='receita'?'#0f6e56':'#993c1d'}">${fmt(t.valor)}</td>
       <td><button class="icon-btn" onclick="delTransacao('${t.id}')">✕</button></td>
@@ -350,19 +476,11 @@ function renderResumo(){
 window.addTask = async function(){
   const nome=document.getElementById('task-nome').value.trim();
   if(!nome){alert('Informe a tarefa.');return;}
-  const obj={
-    nome, empresa:document.getElementById('task-empresa').value,
-    prioridade:document.getElementById('task-prio').value,
-    prazo:document.getElementById('task-prazo').value,
-    status:document.getElementById('task-status').value,
-    nota:document.getElementById('task-nota').value.trim(),
-    criadoEm:Date.now()
-  };
+  const obj={nome,empresa:document.getElementById('task-empresa').value,prioridade:document.getElementById('task-prio').value,prazo:document.getElementById('task-prazo').value,status:document.getElementById('task-status').value,nota:document.getElementById('task-nota').value.trim(),criadoEm:Date.now()};
   const ref=await addDoc(collection(db,'tasks'),obj);
   state.tasks.unshift({id:ref.id,...obj});
   ['task-nome','task-prazo','task-nota'].forEach(id=>document.getElementById(id).value='');
-  toast('Tarefa salva ✓');
-  renderTasks();
+  toast('Tarefa salva ✓'); renderTasks();
 };
 
 window.delTask = async function(id){
@@ -405,13 +523,7 @@ window.addMeta = async function(){
   const nome=document.getElementById('meta-nome').value.trim();
   const alvo=parseFloat(document.getElementById('meta-alvo').value);
   if(!nome||isNaN(alvo)){alert('Informe nome e valor alvo.');return;}
-  const obj={
-    nome, empresa:document.getElementById('meta-empresa').value,
-    alvo, prog:parseFloat(document.getElementById('meta-prog').value)||0,
-    prazo:document.getElementById('meta-prazo').value,
-    unidade:document.getElementById('meta-unidade').value.trim()||'R$',
-    criadoEm:Date.now()
-  };
+  const obj={nome,empresa:document.getElementById('meta-empresa').value,alvo,prog:parseFloat(document.getElementById('meta-prog').value)||0,prazo:document.getElementById('meta-prazo').value,unidade:document.getElementById('meta-unidade').value.trim()||'R$',criadoEm:Date.now()};
   const ref=await addDoc(collection(db,'metas'),obj);
   state.metas.push({id:ref.id,...obj});
   ['meta-nome','meta-alvo','meta-prog','meta-prazo','meta-unidade'].forEach(id=>document.getElementById(id).value='');
@@ -436,8 +548,8 @@ function renderMetas(){
   if(!state.metas.length){document.getElementById('metas-body').innerHTML='<div class="card"><div class="empty">Nenhuma meta.</div></div>';return;}
   document.getElementById('metas-body').innerHTML=state.metas.map(m=>{
     const pct=Math.min(100,Math.round((m.prog/m.alvo)*100));
-    const fv=v=>m.unidade==='R$'?fmt(v):`${Number(v).toLocaleString('pt-BR')} ${m.unidade}`;
     const cor=pct>=100?'#1d9e75':pct>=60?'#ef9f27':'#378add';
+    const fv=v=>m.unidade==='R$'?fmt(v):`${Number(v).toLocaleString('pt-BR')} ${m.unidade}`;
     return `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
         <div><div style="font-weight:600;font-size:14px;margin-bottom:4px">${m.nome}</div>
@@ -463,12 +575,7 @@ window.addEvento = async function(){
   const nome=document.getElementById('ev-nome').value.trim();
   const data=document.getElementById('ev-data').value;
   if(!nome||!data){alert('Informe evento e data.');return;}
-  const obj={
-    nome, empresa:document.getElementById('ev-empresa').value,
-    data, local:document.getElementById('ev-local').value.trim(),
-    nota:document.getElementById('ev-nota').value.trim(),
-    criadoEm:Date.now()
-  };
+  const obj={nome,empresa:document.getElementById('ev-empresa').value,data,local:document.getElementById('ev-local').value.trim(),nota:document.getElementById('ev-nota').value.trim(),criadoEm:Date.now()};
   const ref=await addDoc(collection(db,'eventos'),obj);
   state.eventos.push({id:ref.id,...obj});
   state.eventos.sort((a,b)=>a.data.localeCompare(b.data));
@@ -504,11 +611,10 @@ function renderEventos(){
   document.getElementById('eventos-body').innerHTML=rl(fut,'Próximos')+rl(past,'Passados');
 }
 
-function render(){ renderFinanceiro(); renderTasks(); renderMetas(); renderEventos(); }
+function render(){ renderFinanceiro(); renderTasks(); renderMetas(); renderEventos(); renderDashboard(); }
 
-// init
-document.getElementById('fin-data').value = new Date().toISOString().split('T')[0];
-document.getElementById('task-prazo').value = new Date().toISOString().split('T')[0];
+document.getElementById('fin-data').value=new Date().toISOString().split('T')[0];
+document.getElementById('task-prazo').value=new Date().toISOString().split('T')[0];
 loadAll();
 </script>
 </body>
