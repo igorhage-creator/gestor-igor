@@ -628,9 +628,27 @@ window.delLancamento = async function(id){
   toast('Removido'); renderLancamentos();
 };
 window.quitarLancamento = async function(id){
+  const l=state.lancamentos.find(l=>l.id===id);
+  if(!l) return;
+  // 1. Quita o lançamento
   await updateDoc(doc(db,'lancamentos',id),{quitado:true});
-  const l=state.lancamentos.find(l=>l.id===id); if(l) l.quitado=true;
-  toast('Marcado como quitado ✓'); renderLancamentos();
+  l.quitado=true;
+  // 2. Cria transação automática no Financeiro
+  const transacao = {
+    empresa: l.empresa,
+    tipo: l.tipo==='a-receber'?'receita':'despesa',
+    desc: l.desc,
+    valor: l.valor,
+    categoria: l.nota||'',
+    data: new Date().toISOString().split('T')[0],
+    criadoEm: Date.now(),
+    origem: 'lancamento-quitado'
+  };
+  const ref = await addDoc(collection(db,'transacoes'), transacao);
+  state.transacoes.unshift({id:ref.id,...transacao});
+  toast('✅ Quitado e lançado no Financeiro automaticamente!');
+  renderLancamentos();
+  renderFinanceiro();
 };
 function renderLancamentos(){
   const ft=document.getElementById('lanc-filtro-tipo').value;
