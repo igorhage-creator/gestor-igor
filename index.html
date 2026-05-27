@@ -470,15 +470,21 @@ function renderFinMetrics(){
   document.getElementById('fin-metrics').innerHTML=`<div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green">${fmt(rec)}</div></div><div class="metric"><div class="metric-label">Despesas</div><div class="metric-value red">${fmt(desp)}</div></div><div class="metric"><div class="metric-label">Saldo geral</div><div class="metric-value ${rec-desp>=0?'green':'red'}">${fmt(rec-desp)}</div></div><div class="metric"><div class="metric-label">Mood Mentoria</div><div class="metric-value amber">${fmt(mRec)}</div></div><div class="metric"><div class="metric-label">Pessoal</div><div class="metric-value">${fmt(pRec)}</div></div>`;
 }
 function renderExtrato(){
-  const fe=document.getElementById('fin-filtro-empresa').value;
-  const ft=document.getElementById('fin-filtro-tipo').value;
-  const ord=document.getElementById('fin-ordem').value;
+  const feEl=document.getElementById('fin-filtro-empresa');
+  const ftEl=document.getElementById('fin-filtro-tipo');
+  const ordEl=document.getElementById('fin-ordem');
+  const fe=feEl?feEl.value:'';
+  const ft=ftEl?ftEl.value:'';
+  const ord=ordEl?ordEl.value:'desc';
+
   let list=state.transacoes.filter(t=>{
-    if(fe && t.empresa!==fe) return false;
-    if(ft && t.tipo!==ft) return false;
+    if(fe!=='' && t.empresa!==fe) return false;
+    if(ft!=='' && t.tipo!==ft) return false;
     return true;
   });
-  list.sort((a,b)=> ord==='asc' ? (a.data||'').localeCompare(b.data||'') : (b.data||'').localeCompare(a.data||''));
+  list.sort((a,b)=> ord==='asc'
+    ? (a.data||'').localeCompare(b.data||'')
+    : (b.data||'').localeCompare(a.data||''));
   if(!list.length){document.getElementById('extrato-body').innerHTML='<div class="empty">Nenhuma transação.</div>';return;}
   document.getElementById('extrato-body').innerHTML=`<table><tr><th>Data</th><th>Empresa</th><th>Descrição</th><th>Tipo</th><th style="text-align:right">Valor</th><th></th></tr>${list.map(t=>`<tr><td>${fmtDate(t.data)}</td><td>${empresaTag(t.empresa)}</td><td>${t.desc}${t.categoria?`<br><span style="font-size:11px;color:#aaa">${t.categoria}</span>`:''}</td><td><span class="badge ${t.tipo}">${t.tipo}</span></td><td style="text-align:right;font-weight:600;color:${t.tipo==='receita'?'#0f6e56':'#993c1d'}">${fmt(t.valor)}</td><td><button class="icon-btn" onclick="delTransacao('${t.id}')">✕</button></td></tr>`).join('')}</table>`;
 }
@@ -548,20 +554,27 @@ window.quitarLancamento = async function(id){
   renderLancamentos(); renderFinanceiro();
 };
 function renderLancamentos(){
-  const ft=document.getElementById('lanc-filtro-tipo').value;
-  const fe=document.getElementById('lanc-filtro-empresa').value;
-  const fs=document.getElementById('lanc-filtro-status').value;
-  const ord=document.getElementById('lanc-ordem').value;
+  const ftEl=document.getElementById('lanc-filtro-tipo');
+  const feEl=document.getElementById('lanc-filtro-empresa');
+  const fsEl=document.getElementById('lanc-filtro-status');
+  const ordEl=document.getElementById('lanc-ordem');
+  const ft=ftEl?ftEl.value:'';
+  const fe=feEl?feEl.value:'';
+  const fs=fsEl?fsEl.value:'';
+  const ord=ordEl?ordEl.value:'asc';
+
   let list=state.lancamentos.filter(l=>{
-    if(ft && l.tipo!==ft) return false;
-    if(fe && l.empresa!==fe) return false;
+    if(ft!=='' && l.tipo!==ft) return false;
+    if(fe!=='' && l.empresa!==fe) return false;
     const st=statusLanc(l);
     if(fs==='quitado' && st!=='pago' && st!=='recebido') return false;
     if(fs==='pendente' && st!=='pendente') return false;
     if(fs==='vencido' && st!=='vencido') return false;
     return true;
   });
-  list.sort((a,b)=> ord==='asc' ? a.vencimento.localeCompare(b.vencimento) : b.vencimento.localeCompare(a.vencimento));
+  list.sort((a,b)=> ord==='asc'
+    ? (a.vencimento||'').localeCompare(b.vencimento||'')
+    : (b.vencimento||'').localeCompare(a.vencimento||''));
   if(!list.length){document.getElementById('lanc-body').innerHTML='<div class="empty">Nenhum lançamento.</div>';}
   else{ document.getElementById('lanc-body').innerHTML=`<table><tr><th>Vencimento</th><th>Empresa</th><th>Descrição</th><th>Tipo</th><th style="text-align:right">Valor</th><th>Status</th><th></th></tr>${list.map(l=>{ const st=statusLanc(l),dias=diasAteVenc(l.vencimento),al=!l.quitado&&dias>=0&&dias<=3?`<span style="font-size:10px;color:#854f0b;font-weight:600"> ⚠${dias}d</span>`:'',va=!l.quitado&&dias<0?`<span style="font-size:10px;color:#c04828;font-weight:600"> ●${Math.abs(dias)}d</span>`:'',parcBadge=l.recorrente&&l.parcelaAtual?`<span class="parcela-badge" style="margin-left:4px">${l.parcelaAtual}/${l.totalParcelas||'?'}</span>`:'',recBadge=l.recorrente?`<span class="badge recorrente" style="margin-left:4px">🔁 ${l.freq}</span>`:''; return `<tr><td>${fmtDate(l.vencimento)}${al}${va}</td><td>${empresaTag(l.empresa)}</td><td>${l.desc}${parcBadge}${recBadge}${l.nota?`<br><span style="font-size:11px;color:#aaa">${l.nota}</span>`:''}</td><td><span class="badge ${l.tipo}">${l.tipo==='a-pagar'?'A Pagar':'A Receber'}</span></td><td style="text-align:right;font-weight:600;color:${l.tipo==='a-receber'?'#0f6e56':'#993c1d'}">${fmt(l.valor)}</td><td><span class="badge ${st}">${st}</span></td><td style="display:flex;gap:4px">${!l.quitado?`<button class="btn" style="font-size:11px;padding:3px 8px" onclick="quitarLancamento('${l.id}')">✓</button>`:''}<button class="icon-btn" onclick="delLancamento('${l.id}')">✕</button></td></tr>`; }).join('')}</table>`; }
   const aRec=state.lancamentos.filter(l=>l.tipo==='a-receber'&&!l.quitado).reduce((a,l)=>a+l.valor,0),aPag=state.lancamentos.filter(l=>l.tipo==='a-pagar'&&!l.quitado).reduce((a,l)=>a+l.valor,0),venc=state.lancamentos.filter(l=>!l.quitado&&diasAteVenc(l.vencimento)<0).length;
