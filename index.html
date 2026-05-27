@@ -274,6 +274,17 @@ select option{background:var(--bg2)}
     <div class="row"><div class="col"><label>Empresa</label><select id="el-emp"><option value="Mood Mentoria">Mood Mentoria</option><option value="Pessoal">Pessoal</option></select></div><div class="col"><label>Tipo</label><select id="el-tipo"><option value="a-receber">A Receber</option><option value="a-pagar">A Pagar</option></select></div></div>
     <div class="row"><div class="col"><label>Descrição</label><input type="text" id="el-desc"></div><div class="col" style="max-width:130px"><label>Valor (R$)</label><input type="number" id="el-val" step="0.01"></div></div>
     <div class="row"><div class="col"><label>Vencimento</label><input type="date" id="el-venc"></div><div class="col"><label>Notas</label><input type="text" id="el-nota"></div></div>
+    <div style="margin:10px 0 8px;display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="el-rec" onchange="togRecEdit()" style="width:auto;margin:0;accent-color:var(--accent)">
+      <label for="el-rec" style="font-size:13px;cursor:pointer;font-weight:500;color:var(--text2)">🔁 Lançamento recorrente</label>
+    </div>
+    <div class="recb" id="el-rec-box">
+      <div class="row">
+        <div class="col"><label>Frequência</label><select id="el-freq" onchange="calcParcEdit()"><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>
+        <div class="col"><label>Data final</label><input type="date" id="el-dfim" onchange="calcParcEdit()"></div>
+        <div class="col"><label>Total parcelas</label><input type="text" id="el-tp" readonly style="background:var(--bg);color:var(--text3)"></div>
+      </div>
+    </div>
     <div class="modal-btns"><button class="btn" onclick="fecharModal('modal-lanc')">Cancelar</button><button class="btn p" onclick="salvarLanc()">Salvar</button></div>
   </div>
 </div>
@@ -375,10 +386,7 @@ select option{background:var(--bg2)}
         <div class="recb" id="rec-box">
           <div class="row"><div class="col"><label>Frequência</label><select id="l-freq" onchange="calcParc()"><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div><div class="col"><label>Data final</label><input type="date" id="l-dfim" onchange="calcParc()"></div><div class="col"><label>Total parcelas</label><input type="text" id="l-tp" readonly style="background:var(--bg);color:var(--text3)"></div></div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
-          <button class="btn p" onclick="addLanc()">+ Adicionar</button>
-          <span style="font-size:11px;color:var(--text3)">📅 Avise o Claude para criar evento no Calendar</span>
-        </div>
+        <button class="btn p" onclick="addLanc()">+ Adicionar</button>
       </div>
       <div class="card">
         <div class="frow">
@@ -747,6 +755,9 @@ function addLanc(){
   });
 }
 
+function togRecEdit(){ document.getElementById('el-rec-box').classList.toggle('on',document.getElementById('el-rec').checked); }
+function calcParcEdit(){ var i=gv('el-venc'),f=gv('el-dfim'),fr=gv('el-freq'); if(i&&f){var t=totP(i,f,fr);document.getElementById('el-tp').value=t?t+' parcelas':'';} }
+
 function editarLanc(id){
   var l=D.la.find(function(x){return x.id===id;}); if(!l) return;
   document.getElementById('el-id').value=id;
@@ -756,6 +767,13 @@ function editarLanc(id){
   document.getElementById('el-val').value=l.valor;
   document.getElementById('el-venc').value=l.vencimento||'';
   document.getElementById('el-nota').value=l.nota||'';
+  // recorrência
+  var isRec=l.recorrente||false;
+  document.getElementById('el-rec').checked=isRec;
+  document.getElementById('el-rec-box').classList.toggle('on',isRec);
+  document.getElementById('el-freq').value=l.freq||'mensal';
+  document.getElementById('el-dfim').value=l.dataFinal||'';
+  document.getElementById('el-tp').value=l.totalParcelas?l.totalParcelas+' parcelas':'';
   document.getElementById('modal-lanc').classList.add('on');
 }
 
