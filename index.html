@@ -8,9 +8,30 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a18;min-height:100vh}
-header{background:#fff;border-bottom:1px solid #e5e5e0;padding:14px 24px;display:flex;align-items:center;gap:12px}
-header h1{font-size:16px;font-weight:600}
-header span{font-size:12px;color:#888;background:#f0f0ea;padding:2px 8px;border-radius:20px}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f0}
+.login-box{background:#fff;border:1px solid #e5e5e0;border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.login-logo{font-size:28px;margin-bottom:6px;text-align:center}
+.login-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-field label{font-size:11px;font-weight:600;color:#888;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.login-field input{width:100%;padding:10px 12px;font-size:14px;border:1px solid #e5e5e0;border-radius:8px;background:#fff;color:#1a1a18;font-family:inherit;outline:none;transition:border .15s}
+.login-field input:focus{border-color:#1a1a18}
+.login-btn{width:100%;padding:11px;border-radius:8px;border:none;background:#1a1a18;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:4px;transition:opacity .15s}
+.login-btn:hover{opacity:.85}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-error{background:#fef2f0;border:1px solid #f5b8a8;border-radius:8px;padding:10px 12px;font-size:13px;color:#8b2500;margin-top:12px;display:none}
+
+/* APP */
+#app-screen{display:none}
+header{background:#fff;border-bottom:1px solid #e5e5e0;padding:12px 24px;display:flex;align-items:center;gap:12px}
+header h1{font-size:15px;font-weight:600;flex:1}
+.header-user{font-size:12px;color:#888}
+.logout-btn{padding:5px 12px;border-radius:6px;border:1px solid #e5e5e0;font-size:12px;cursor:pointer;background:#fff;color:#666;font-family:inherit}
+.logout-btn:hover{background:#fef2f0;color:#c04828;border-color:#f5b8a8}
+#sync-status{font-size:12px;color:#888;background:#f0f0ea;padding:2px 8px;border-radius:20px}
 .container{max-width:980px;margin:0 auto;padding:20px 16px}
 .tabs{display:flex;gap:3px;margin-bottom:20px;background:#fff;padding:5px;border-radius:10px;border:1px solid #e5e5e0;overflow-x:auto}
 .tab{flex:1;min-width:90px;padding:8px 6px;border-radius:7px;border:none;font-size:12px;cursor:pointer;background:transparent;color:#666;font-family:inherit;transition:all .15s;text-align:center;white-space:nowrap}
@@ -67,7 +88,6 @@ textarea{resize:vertical;min-height:56px}
 .donut-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;justify-content:center}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
 .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-/* KANBAN */
 .view-toggle{display:flex;gap:4px;margin-bottom:12px}
 .vbtn{padding:5px 12px;border-radius:6px;border:1px solid #e5e5e0;font-size:12px;cursor:pointer;background:#fff;color:#666;font-family:inherit}
 .vbtn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
@@ -77,190 +97,214 @@ textarea{resize:vertical;min-height:56px}
 .kanban-card{background:#fff;border:1px solid #e5e5e0;border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:13px}
 .kanban-card .nome{font-weight:500;margin-bottom:4px}
 .kanban-card .meta{font-size:11px;color:#aaa;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-/* VENCIMENTO */
 .venc-alert{background:#fff8ed;border:1px solid #f5d28a;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;display:flex;align-items:center;gap:8px}
 .venc-alert.vencido{background:#fef2f0;border-color:#f5b8a8}
 @media(max-width:640px){.dash-grid{grid-template-columns:1fr}.kanban{grid-template-columns:1fr}.row{flex-direction:column}.metric-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<header>
-  <h1>⚡ Gestor Igor</h1>
-  <span id="sync-status">conectando...</span>
-</header>
-<div class="container">
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('dash-mood')">🟣 Mood</button>
-    <button class="tab" onclick="showTab('dash-igor')">🟡 Igor</button>
-    <button class="tab" onclick="showTab('financeiro')">💰 Financeiro</button>
-    <button class="tab" onclick="showTab('tarefas')">✅ Tarefas</button>
-    <button class="tab" onclick="showTab('lancamentos')">📋 Lançamentos</button>
-  </div>
 
-  <!-- DASHBOARD MOOD -->
-  <div id="tab-dash-mood" class="panel active">
-    <div id="mood-metrics" class="metric-grid"></div>
-    <div class="dash-grid">
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">⚡</div>
+    <div class="login-title">Gestor Igor</div>
+    <div class="login-sub">Acesso restrito</div>
+    <div class="login-field">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') fazerLogin()">
+    </div>
+    <button class="login-btn" id="login-btn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <header>
+    <h1>⚡ Gestor Igor</h1>
+    <span id="sync-status">conectando...</span>
+    <span class="header-user" id="header-user"></span>
+    <button class="logout-btn" onclick="fazerLogout()">Sair</button>
+  </header>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('dash-mood')">🟣 Mood</button>
+      <button class="tab" onclick="showTab('dash-igor')">🟡 Igor</button>
+      <button class="tab" onclick="showTab('financeiro')">💰 Financeiro</button>
+      <button class="tab" onclick="showTab('tarefas')">✅ Tarefas</button>
+      <button class="tab" onclick="showTab('lancamentos')">📋 Lançamentos</button>
+    </div>
+
+    <!-- DASHBOARD MOOD -->
+    <div id="tab-dash-mood" class="panel active">
+      <div id="mood-metrics" class="metric-grid"></div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-title">Receitas x Despesas — Mood</div>
+          <div class="chart-wrap"><canvas id="chart-mood-mensal"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tarefas Mood por status</div>
+          <div class="chart-wrap" style="height:160px"><canvas id="chart-mood-tasks"></canvas></div>
+          <div class="donut-legend" id="mood-tasks-legend"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">Próximos vencimentos — Mood</div>
+        <div id="mood-vencimentos"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD IGOR -->
+    <div id="tab-dash-igor" class="panel">
+      <div id="igor-metrics" class="metric-grid"></div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-title">Receitas x Despesas — Igor</div>
+          <div class="chart-wrap"><canvas id="chart-igor-mensal"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tarefas Igor por status</div>
+          <div class="chart-wrap" style="height:160px"><canvas id="chart-igor-tasks"></canvas></div>
+          <div class="donut-legend" id="igor-tasks-legend"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">Próximos vencimentos — Igor</div>
+        <div id="igor-vencimentos"></div>
+      </div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div id="tab-financeiro" class="panel">
+      <div id="fin-metrics" class="metric-grid"></div>
       <div class="card">
-        <div class="card-title">Receitas x Despesas — Mood</div>
-        <div class="chart-wrap"><canvas id="chart-mood-mensal"></canvas></div>
+        <div class="card-title">Nova transação</div>
+        <div class="row">
+          <div class="col"><label>Empresa</label>
+            <select id="fin-empresa"><option>Mood Mentoria</option><option>Pessoal</option></select>
+          </div>
+          <div class="col"><label>Tipo</label>
+            <select id="fin-tipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col"><label>Descrição</label><input type="text" id="fin-desc" placeholder="Ex: Consultoria Vale do Rio Doce"></div>
+          <div class="col" style="max-width:140px"><label>Valor (R$)</label><input type="number" id="fin-valor" placeholder="0,00" step="0.01"></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>Categoria</label><input type="text" id="fin-cat" placeholder="Ex: Receita de mentoria"></div>
+          <div class="col" style="max-width:140px"><label>Data</label><input type="date" id="fin-data"></div>
+        </div>
+        <button class="btn primary" onclick="addTransacao()">+ Adicionar</button>
       </div>
       <div class="card">
-        <div class="card-title">Tarefas Mood por status</div>
-        <div class="chart-wrap" style="height:160px"><canvas id="chart-mood-tasks"></canvas></div>
-        <div class="donut-legend" id="mood-tasks-legend"></div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <div class="card-title">Próximos vencimentos — Mood</div>
-      <div id="mood-vencimentos"></div>
-    </div>
-  </div>
-
-  <!-- DASHBOARD IGOR -->
-  <div id="tab-dash-igor" class="panel">
-    <div id="igor-metrics" class="metric-grid"></div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-title">Receitas x Despesas — Igor</div>
-        <div class="chart-wrap"><canvas id="chart-igor-mensal"></canvas></div>
+        <div class="card-title">Extrato</div>
+        <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <select id="fin-filtro-empresa" onchange="renderExtrato()" style="width:auto;font-size:12px;padding:5px 8px">
+            <option value="">Todas as empresas</option>
+            <option>Mood Mentoria</option><option>Pessoal</option>
+          </select>
+          <select id="fin-filtro-tipo" onchange="renderExtrato()" style="width:auto;font-size:12px;padding:5px 8px">
+            <option value="">Receitas e despesas</option>
+            <option value="receita">Só receitas</option><option value="despesa">Só despesas</option>
+          </select>
+        </div>
+        <div id="extrato-body"></div>
       </div>
       <div class="card">
-        <div class="card-title">Tarefas Igor por status</div>
-        <div class="chart-wrap" style="height:160px"><canvas id="chart-igor-tasks"></canvas></div>
-        <div class="donut-legend" id="igor-tasks-legend"></div>
+        <div class="card-title">Resumo por empresa</div>
+        <div id="resumo-empresas"></div>
       </div>
     </div>
-    <div class="card" style="margin-top:12px">
-      <div class="card-title">Próximos vencimentos — Igor</div>
-      <div id="igor-vencimentos"></div>
-    </div>
-  </div>
 
-  <!-- FINANCEIRO -->
-  <div id="tab-financeiro" class="panel">
-    <div id="fin-metrics" class="metric-grid"></div>
-    <div class="card">
-      <div class="card-title">Nova transação</div>
-      <div class="row">
-        <div class="col"><label>Empresa</label>
-          <select id="fin-empresa"><option>Mood Mentoria</option><option>Pessoal</option></select>
+    <!-- TAREFAS -->
+    <div id="tab-tarefas" class="panel">
+      <div class="card">
+        <div class="card-title">Nova tarefa</div>
+        <div class="row">
+          <div class="col"><label>Tarefa</label><input type="text" id="task-nome" placeholder="Ex: Enviar proposta para Vale"></div>
+          <div class="col" style="max-width:160px"><label>Empresa</label>
+            <select id="task-empresa"><option>Mood Mentoria</option><option>Pessoal</option></select>
+          </div>
         </div>
-        <div class="col"><label>Tipo</label>
-          <select id="fin-tipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
+        <div class="row">
+          <div class="col"><label>Prioridade</label>
+            <select id="task-prio"><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select>
+          </div>
+          <div class="col"><label>Prazo</label><input type="date" id="task-prazo"></div>
+          <div class="col"><label>Status</label>
+            <select id="task-status"><option value="aberto">Aberto</option><option value="fazendo">Fazendo</option><option value="feito">Feito</option></select>
+          </div>
         </div>
+        <div class="row"><div class="col"><label>Notas</label><textarea id="task-nota" placeholder="Observações..."></textarea></div></div>
+        <button class="btn primary" onclick="addTask()">+ Adicionar</button>
       </div>
-      <div class="row">
-        <div class="col"><label>Descrição</label><input type="text" id="fin-desc" placeholder="Ex: Consultoria Vale do Rio Doce"></div>
-        <div class="col" style="max-width:140px"><label>Valor (R$)</label><input type="number" id="fin-valor" placeholder="0,00" step="0.01"></div>
+      <div class="card">
+        <div class="view-toggle">
+          <button class="vbtn active" id="vbtn-lista" onclick="setTaskView('lista')">☰ Lista</button>
+          <button class="vbtn" id="vbtn-kanban" onclick="setTaskView('kanban')">⬛ Kanban</button>
+          <select id="task-filtro-empresa" onchange="renderTasks()" style="width:auto;font-size:12px;padding:5px 8px;margin-left:8px">
+            <option value="">Todas</option><option>Mood Mentoria</option><option>Pessoal</option>
+          </select>
+          <select id="task-filtro-status" onchange="renderTasks()" style="width:auto;font-size:12px;padding:5px 8px">
+            <option value="">Todos os status</option>
+            <option value="aberto">Aberto</option><option value="fazendo">Fazendo</option><option value="feito">Feito</option>
+          </select>
+        </div>
+        <div id="tasks-body"></div>
       </div>
-      <div class="row">
-        <div class="col"><label>Categoria</label><input type="text" id="fin-cat" placeholder="Ex: Receita de mentoria"></div>
-        <div class="col" style="max-width:140px"><label>Data</label><input type="date" id="fin-data"></div>
-      </div>
-      <button class="btn primary" onclick="addTransacao()">+ Adicionar</button>
     </div>
-    <div class="card">
-      <div class="card-title">Extrato</div>
-      <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
-        <select id="fin-filtro-empresa" onchange="renderExtrato()" style="width:auto;font-size:12px;padding:5px 8px">
-          <option value="">Todas as empresas</option>
-          <option>Mood Mentoria</option><option>Pessoal</option>
-        </select>
-        <select id="fin-filtro-tipo" onchange="renderExtrato()" style="width:auto;font-size:12px;padding:5px 8px">
-          <option value="">Receitas e despesas</option>
-          <option value="receita">Só receitas</option><option value="despesa">Só despesas</option>
-        </select>
-      </div>
-      <div id="extrato-body"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Resumo por empresa</div>
-      <div id="resumo-empresas"></div>
-    </div>
-  </div>
 
-  <!-- TAREFAS -->
-  <div id="tab-tarefas" class="panel">
-    <div class="card">
-      <div class="card-title">Nova tarefa</div>
-      <div class="row">
-        <div class="col"><label>Tarefa</label><input type="text" id="task-nome" placeholder="Ex: Enviar proposta para Vale"></div>
-        <div class="col" style="max-width:160px"><label>Empresa</label>
-          <select id="task-empresa"><option>Mood Mentoria</option><option>Pessoal</option></select>
+    <!-- LANÇAMENTOS FUTUROS -->
+    <div id="tab-lancamentos" class="panel">
+      <div class="card">
+        <div class="card-title">Novo lançamento futuro</div>
+        <div class="row">
+          <div class="col"><label>Descrição</label><input type="text" id="lanc-desc" placeholder="Ex: Aluguel escritório, Mensalidade cliente..."></div>
+          <div class="col" style="max-width:160px"><label>Empresa</label>
+            <select id="lanc-empresa"><option>Mood Mentoria</option><option>Pessoal</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col"><label>Tipo</label>
+            <select id="lanc-tipo"><option value="a-receber">A Receber</option><option value="a-pagar">A Pagar</option></select>
+          </div>
+          <div class="col" style="max-width:140px"><label>Valor (R$)</label><input type="number" id="lanc-valor" placeholder="0,00" step="0.01"></div>
+          <div class="col" style="max-width:160px"><label>Vencimento</label><input type="date" id="lanc-venc"></div>
+        </div>
+        <div class="row"><div class="col"><label>Notas</label><textarea id="lanc-nota" placeholder="Observações, número NF, cliente..."></textarea></div></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap">
+          <button class="btn primary" onclick="addLancamento()">+ Adicionar</button>
+          <span style="font-size:11px;color:#aaa">📅 Avise o Claude para criar o evento no Google Calendar</span>
         </div>
       </div>
-      <div class="row">
-        <div class="col"><label>Prioridade</label>
-          <select id="task-prio"><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select>
+      <div class="card">
+        <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="lanc-filtro-tipo" onchange="renderLancamentos()" style="width:auto;font-size:12px;padding:5px 8px">
+            <option value="">A Pagar e A Receber</option>
+            <option value="a-pagar">Só A Pagar</option><option value="a-receber">Só A Receber</option>
+          </select>
+          <select id="lanc-filtro-empresa" onchange="renderLancamentos()" style="width:auto;font-size:12px;padding:5px 8px">
+            <option value="">Todas as empresas</option>
+            <option>Mood Mentoria</option><option>Pessoal</option>
+          </select>
+          <select id="lanc-filtro-status" onchange="renderLancamentos()" style="width:auto;font-size:12px;padding:5px 8px">
+            <option value="">Todos</option>
+            <option value="pendente">Pendente</option><option value="quitado">Quitado</option><option value="vencido">Vencido</option>
+          </select>
         </div>
-        <div class="col"><label>Prazo</label><input type="date" id="task-prazo"></div>
-        <div class="col"><label>Status</label>
-          <select id="task-status"><option value="aberto">Aberto</option><option value="fazendo">Fazendo</option><option value="feito">Feito</option></select>
-        </div>
+        <div id="lanc-body"></div>
       </div>
-      <div class="row"><div class="col"><label>Notas</label><textarea id="task-nota" placeholder="Observações..."></textarea></div></div>
-      <button class="btn primary" onclick="addTask()">+ Adicionar</button>
-    </div>
-    <div class="card">
-      <div class="view-toggle">
-        <button class="vbtn active" id="vbtn-lista" onclick="setTaskView('lista')">☰ Lista</button>
-        <button class="vbtn" id="vbtn-kanban" onclick="setTaskView('kanban')">⬛ Kanban</button>
-        <select id="task-filtro-empresa" onchange="renderTasks()" style="width:auto;font-size:12px;padding:5px 8px;margin-left:8px">
-          <option value="">Todas</option><option>Mood Mentoria</option><option>Pessoal</option>
-        </select>
-        <select id="task-filtro-status" onchange="renderTasks()" style="width:auto;font-size:12px;padding:5px 8px">
-          <option value="">Todos os status</option>
-          <option value="aberto">Aberto</option><option value="fazendo">Fazendo</option><option value="feito">Feito</option>
-        </select>
+      <div class="card">
+        <div class="card-title">Resumo lançamentos</div>
+        <div id="lanc-resumo"></div>
       </div>
-      <div id="tasks-body"></div>
-    </div>
-  </div>
-
-  <!-- LANÇAMENTOS FUTUROS -->
-  <div id="tab-lancamentos" class="panel">
-    <div class="card">
-      <div class="card-title">Novo lançamento futuro</div>
-      <div class="row">
-        <div class="col"><label>Descrição</label><input type="text" id="lanc-desc" placeholder="Ex: Aluguel escritório, Mensalidade cliente..."></div>
-        <div class="col" style="max-width:160px"><label>Empresa</label>
-          <select id="lanc-empresa"><option>Mood Mentoria</option><option>Pessoal</option></select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col"><label>Tipo</label>
-          <select id="lanc-tipo"><option value="a-receber">A Receber</option><option value="a-pagar">A Pagar</option></select>
-        </div>
-        <div class="col" style="max-width:140px"><label>Valor (R$)</label><input type="number" id="lanc-valor" placeholder="0,00" step="0.01"></div>
-        <div class="col" style="max-width:160px"><label>Vencimento</label><input type="date" id="lanc-venc"></div>
-      </div>
-      <div class="row"><div class="col"><label>Notas</label><textarea id="lanc-nota" placeholder="Observações, número NF, cliente..."></textarea></div></div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        <button class="btn primary" onclick="addLancamento()">+ Adicionar e criar evento no Calendar</button>
-        <span style="font-size:11px;color:#aaa">📅 Evento criado automaticamente no Google Calendar</span>
-      </div>
-    </div>
-    <div class="card">
-      <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <select id="lanc-filtro-tipo" onchange="renderLancamentos()" style="width:auto;font-size:12px;padding:5px 8px">
-          <option value="">A Pagar e A Receber</option>
-          <option value="a-pagar">Só A Pagar</option><option value="a-receber">Só A Receber</option>
-        </select>
-        <select id="lanc-filtro-empresa" onchange="renderLancamentos()" style="width:auto;font-size:12px;padding:5px 8px">
-          <option value="">Todas as empresas</option>
-          <option>Mood Mentoria</option><option>Pessoal</option>
-        </select>
-        <select id="lanc-filtro-status" onchange="renderLancamentos()" style="width:auto;font-size:12px;padding:5px 8px">
-          <option value="">Todos</option>
-          <option value="pendente">Pendente</option><option value="pago">Pago/Recebido</option><option value="vencido">Vencido</option>
-        </select>
-      </div>
-      <div id="lanc-body"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Resumo lançamentos</div>
-      <div id="lanc-resumo"></div>
     </div>
   </div>
 </div>
@@ -270,6 +314,7 @@ textarea{resize:vertical;min-height:56px}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDzFrI9-1nFFzk1JVztoe8mdjfiFuK4QI0",
@@ -282,32 +327,60 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
 let state = { transacoes:[], tasks:[], lancamentos:[] };
 let charts = {};
 let taskView = 'lista';
 
+// ---- AUTH ----
+onAuthStateChanged(auth, user => {
+  if(user){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='block';
+    document.getElementById('header-user').textContent=user.email;
+    loadAll();
+  } else {
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app-screen').style.display='none';
+  }
+});
+
+window.fazerLogin = async function(){
+  const email=document.getElementById('login-email').value.trim();
+  const senha=document.getElementById('login-senha').value;
+  const btn=document.getElementById('login-btn');
+  const err=document.getElementById('login-error');
+  if(!email||!senha){err.textContent='Preencha e-mail e senha.';err.style.display='block';return;}
+  btn.disabled=true; btn.textContent='Entrando...'; err.style.display='none';
+  try{
+    await signInWithEmailAndPassword(auth,email,senha);
+  } catch(e){
+    const msgs={'auth/invalid-credential':'E-mail ou senha incorretos.','auth/user-not-found':'Usuário não encontrado.','auth/wrong-password':'Senha incorreta.','auth/too-many-requests':'Muitas tentativas. Tente mais tarde.'};
+    err.textContent=msgs[e.code]||'Erro ao entrar. Tente novamente.';
+    err.style.display='block';
+    btn.disabled=false; btn.textContent='Entrar';
+  }
+};
+
+window.fazerLogout = async function(){
+  await signOut(auth);
+  state={transacoes:[],tasks:[],lancamentos:[]};
+  document.getElementById('login-email').value='';
+  document.getElementById('login-senha').value='';
+};
+
+// ---- UTILS ----
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
 function setSyncStatus(msg,color='#888'){ const el=document.getElementById('sync-status'); el.textContent=msg; el.style.color=color; }
 function fmt(v){ return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return '-'; try{ return new Date(d+'T12:00').toLocaleDateString('pt-BR'); }catch(e){return d;} }
 function empresaTag(e){ const cls=e==='Mood Mentoria'?'tag-mood':'tag-pessoal'; return `<span class="empresa-tag ${cls}">${e}</span>`; }
 function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+function diasAteVenc(d){ const h=new Date(); h.setHours(0,0,0,0); return Math.round((new Date(d+'T12:00')-h)/(864e5)); }
+function statusLancamento(l){ if(l.quitado) return l.tipo==='a-pagar'?'pago':'recebido'; return diasAteVenc(l.vencimento)<0?'vencido':'pendente'; }
 
-// Dias até vencimento
-function diasAteVenc(dataStr){
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-  const venc = new Date(dataStr+'T12:00');
-  return Math.round((venc-hoje)/(1000*60*60*24));
-}
-
-function statusLancamento(l){
-  if(l.quitado) return l.tipo==='a-pagar'?'pago':'recebido';
-  const dias = diasAteVenc(l.vencimento);
-  if(dias < 0) return 'vencido';
-  return 'pendente';
-}
-
-// TABS
+// ---- TABS ----
 window.showTab = function(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -318,7 +391,7 @@ window.showTab = function(id){
   if(id==='dash-igor') renderDashIgor();
 };
 
-// LOAD
+// ---- LOAD ----
 async function loadAll(){
   setSyncStatus('sincronizando...');
   try{
@@ -328,47 +401,29 @@ async function loadAll(){
     }
     setSyncStatus('● online','#0f6e56');
     render();
-  }catch(e){ setSyncStatus('● offline','#993c1d'); console.error(e); }
+  }catch(e){ setSyncStatus('● offline','#993c1d'); }
 }
 
-// ---- DASHBOARD MOOD ----
-function renderDashMood(){
-  const emp='Mood Mentoria';
+// ---- DASHBOARDS ----
+function renderDashMood(){ renderDash('Mood Mentoria','mood'); }
+function renderDashIgor(){ renderDash('Pessoal','igor'); }
+
+function renderDash(emp, prefix){
   const rec=state.transacoes.filter(t=>t.empresa===emp&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
   const desp=state.transacoes.filter(t=>t.empresa===emp&&t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
   const tarefas=state.tasks.filter(t=>t.empresa===emp);
-  const aReceber=state.lancamentos.filter(l=>l.empresa===emp&&l.tipo==='a-receber'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
-  const aPagar=state.lancamentos.filter(l=>l.empresa===emp&&l.tipo==='a-pagar'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
-  document.getElementById('mood-metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Saldo Mood</div><div class="metric-value ${rec-desp>=0?'green':'red'}">${fmt(rec-desp)}</div></div>
+  const aRec=state.lancamentos.filter(l=>l.empresa===emp&&l.tipo==='a-receber'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
+  const aPag=state.lancamentos.filter(l=>l.empresa===emp&&l.tipo==='a-pagar'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
+  document.getElementById(prefix+'-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Saldo</div><div class="metric-value ${rec-desp>=0?'green':'red'}">${fmt(rec-desp)}</div></div>
     <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green">${fmt(rec)}</div></div>
     <div class="metric"><div class="metric-label">Despesas</div><div class="metric-value red">${fmt(desp)}</div></div>
-    <div class="metric"><div class="metric-label">A Receber</div><div class="metric-value blue">${fmt(aReceber)}</div></div>
-    <div class="metric"><div class="metric-label">A Pagar</div><div class="metric-value amber">${fmt(aPagar)}</div></div>
+    <div class="metric"><div class="metric-label">A Receber</div><div class="metric-value blue">${fmt(aRec)}</div></div>
+    <div class="metric"><div class="metric-label">A Pagar</div><div class="metric-value amber">${fmt(aPag)}</div></div>
     <div class="metric"><div class="metric-label">Tarefas abertas</div><div class="metric-value amber">${tarefas.filter(t=>t.status==='aberto').length}</div></div>`;
-  renderDashMensal('chart-mood-mensal',emp);
-  renderDashTasks('chart-mood-tasks','mood-tasks-legend',emp);
-  renderDashVencimentos('mood-vencimentos',emp);
-}
-
-// ---- DASHBOARD IGOR ----
-function renderDashIgor(){
-  const emp='Pessoal';
-  const rec=state.transacoes.filter(t=>t.empresa===emp&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
-  const desp=state.transacoes.filter(t=>t.empresa===emp&&t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
-  const tarefas=state.tasks.filter(t=>t.empresa===emp);
-  const aReceber=state.lancamentos.filter(l=>l.empresa===emp&&l.tipo==='a-receber'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
-  const aPagar=state.lancamentos.filter(l=>l.empresa===emp&&l.tipo==='a-pagar'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
-  document.getElementById('igor-metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Saldo Igor</div><div class="metric-value ${rec-desp>=0?'green':'red'}">${fmt(rec-desp)}</div></div>
-    <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green">${fmt(rec)}</div></div>
-    <div class="metric"><div class="metric-label">Despesas</div><div class="metric-value red">${fmt(desp)}</div></div>
-    <div class="metric"><div class="metric-label">A Receber</div><div class="metric-value blue">${fmt(aReceber)}</div></div>
-    <div class="metric"><div class="metric-label">A Pagar</div><div class="metric-value amber">${fmt(aPagar)}</div></div>
-    <div class="metric"><div class="metric-label">Tarefas abertas</div><div class="metric-value amber">${tarefas.filter(t=>t.status==='aberto').length}</div></div>`;
-  renderDashMensal('chart-igor-mensal',emp);
-  renderDashTasks('chart-igor-tasks','igor-tasks-legend',emp);
-  renderDashVencimentos('igor-vencimentos',emp);
+  renderDashMensal('chart-'+prefix+'-mensal', emp);
+  renderDashTasks('chart-'+prefix+'-tasks', prefix+'-tasks-legend', emp);
+  renderDashVencimentos(prefix+'-vencimentos', emp);
 }
 
 function renderDashMensal(canvasId, emp){
@@ -377,7 +432,7 @@ function renderDashMensal(canvasId, emp){
     if(!t.data) return;
     const m=t.data.substring(0,7);
     if(!meses[m]) meses[m]={rec:0,desp:0};
-    if(t.tipo==='receita') meses[m].rec+=t.valor; else meses[m].desp+=t.valor;
+    t.tipo==='receita'?meses[m].rec+=t.valor:meses[m].desp+=t.valor;
   });
   const labels=Object.keys(meses).sort();
   const mFmt=labels.map(m=>{ const[y,mo]=m.split('-'); return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][parseInt(mo)-1]+'/'+y.slice(2); });
@@ -385,8 +440,7 @@ function renderDashMensal(canvasId, emp){
   const el=document.getElementById(canvasId);
   if(!el) return;
   if(!labels.length){ el.closest('.chart-wrap').innerHTML='<div class="empty">Sem dados financeiros.</div>'; return; }
-  const ctx=el.getContext('2d');
-  charts[canvasId]=new Chart(ctx,{type:'bar',data:{labels:mFmt,datasets:[
+  charts[canvasId]=new Chart(el.getContext('2d'),{type:'bar',data:{labels:mFmt,datasets:[
     {label:'Receitas',data:labels.map(m=>meses[m].rec),backgroundColor:'#d1f0e6',borderColor:'#0f6e56',borderWidth:1.5,borderRadius:4},
     {label:'Despesas',data:labels.map(m=>meses[m].desp),backgroundColor:'#fde8e0',borderColor:'#993c1d',borderWidth:1.5,borderRadius:4}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:10}}},scales:{y:{ticks:{font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#f0f0ea'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
@@ -401,8 +455,7 @@ function renderDashTasks(canvasId, legendId, emp){
   const el=document.getElementById(canvasId);
   if(!el) return;
   if(!list.length){ el.closest('.chart-wrap').innerHTML='<div class="empty">Sem tarefas.</div>'; return; }
-  const ctx=el.getContext('2d');
-  charts[canvasId]=new Chart(ctx,{type:'doughnut',data:{labels:['Aberto','Fazendo','Feito'],datasets:[{data:[ab,faz,feit],backgroundColor:['#e5e5e0','#bfd9f5','#c8eedd'],borderColor:['#aaa','#378add','#0f6e56'],borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'62%'}});
+  charts[canvasId]=new Chart(el.getContext('2d'),{type:'doughnut',data:{labels:['Aberto','Fazendo','Feito'],datasets:[{data:[ab,faz,feit],backgroundColor:['#e5e5e0','#bfd9f5','#c8eedd'],borderColor:['#aaa','#378add','#0f6e56'],borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'62%'}});
   document.getElementById(legendId).innerHTML=`
     <div class="legend-item"><div class="legend-dot" style="background:#e5e5e0;border:1px solid #aaa"></div>Aberto (${ab})</div>
     <div class="legend-item"><div class="legend-dot" style="background:#bfd9f5;border:1px solid #378add"></div>Fazendo (${faz})</div>
@@ -410,18 +463,16 @@ function renderDashTasks(canvasId, legendId, emp){
 }
 
 function renderDashVencimentos(elId, emp){
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
   const list=state.lancamentos.filter(l=>l.empresa===emp&&!l.quitado).sort((a,b)=>a.vencimento.localeCompare(b.vencimento)).slice(0,5);
   if(!list.length){ document.getElementById(elId).innerHTML='<div class="empty">Nenhum vencimento pendente.</div>'; return; }
   document.getElementById(elId).innerHTML=list.map(l=>{
     const dias=diasAteVenc(l.vencimento);
-    const vencido=dias<0;
-    const proximo=dias>=0&&dias<=3;
-    return `<div class="venc-alert ${vencido?'vencido':''}">
+    const venc=dias<0, prox=dias>=0&&dias<=3;
+    return `<div class="venc-alert ${venc?'vencido':''}">
       <span>${l.tipo==='a-pagar'?'🔴':'🟢'}</span>
       <div style="flex:1">
         <div style="font-weight:500">${l.desc} — ${fmt(l.valor)}</div>
-        <div style="font-size:11px;color:#888">${fmtDate(l.vencimento)} ${vencido?`<span style="color:#c04828;font-weight:600">● Vencido há ${Math.abs(dias)} dia(s)</span>`:proximo?`<span style="color:#854f0b;font-weight:600">● Vence em ${dias} dia(s)</span>`:`· em ${dias} dias`}</div>
+        <div style="font-size:11px;color:#888">${fmtDate(l.vencimento)} ${venc?`<span style="color:#c04828;font-weight:600">● Vencido há ${Math.abs(dias)}d</span>`:prox?`<span style="color:#854f0b;font-weight:600">● Vence em ${dias}d</span>`:`· em ${dias} dias`}</div>
       </div>
       <span class="badge ${l.tipo}">${l.tipo==='a-pagar'?'A Pagar':'A Receber'}</span>
     </div>`;
@@ -439,28 +490,24 @@ window.addTransacao = async function(){
   ['fin-desc','fin-valor','fin-cat','fin-data'].forEach(id=>document.getElementById(id).value='');
   toast('Transação salva ✓'); renderFinanceiro();
 };
-
 window.delTransacao = async function(id){
   await deleteDoc(doc(db,'transacoes',id));
   state.transacoes=state.transacoes.filter(t=>t.id!==id);
   toast('Removido'); renderFinanceiro();
 };
-
 function renderFinanceiro(){ renderFinMetrics(); renderExtrato(); renderResumo(); }
-
 function renderFinMetrics(){
   const rec=state.transacoes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
   const desp=state.transacoes.filter(t=>t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
-  const moodRec=state.transacoes.filter(t=>t.empresa==='Mood Mentoria'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
-  const pesRec=state.transacoes.filter(t=>t.empresa==='Pessoal'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+  const mRec=state.transacoes.filter(t=>t.empresa==='Mood Mentoria'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
+  const pRec=state.transacoes.filter(t=>t.empresa==='Pessoal'&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
   document.getElementById('fin-metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Receitas total</div><div class="metric-value green">${fmt(rec)}</div></div>
-    <div class="metric"><div class="metric-label">Despesas total</div><div class="metric-value red">${fmt(desp)}</div></div>
+    <div class="metric"><div class="metric-label">Receitas</div><div class="metric-value green">${fmt(rec)}</div></div>
+    <div class="metric"><div class="metric-label">Despesas</div><div class="metric-value red">${fmt(desp)}</div></div>
     <div class="metric"><div class="metric-label">Saldo geral</div><div class="metric-value ${rec-desp>=0?'green':'red'}">${fmt(rec-desp)}</div></div>
-    <div class="metric"><div class="metric-label">Mood Mentoria</div><div class="metric-value amber">${fmt(moodRec)}</div></div>
-    <div class="metric"><div class="metric-label">Pessoal</div><div class="metric-value">${fmt(pesRec)}</div></div>`;
+    <div class="metric"><div class="metric-label">Mood Mentoria</div><div class="metric-value amber">${fmt(mRec)}</div></div>
+    <div class="metric"><div class="metric-label">Pessoal</div><div class="metric-value">${fmt(pRec)}</div></div>`;
 }
-
 function renderExtrato(){
   const fe=document.getElementById('fin-filtro-empresa').value;
   const ft=document.getElementById('fin-filtro-tipo').value;
@@ -476,14 +523,12 @@ function renderExtrato(){
       <td><button class="icon-btn" onclick="delTransacao('${t.id}')">✕</button></td>
     </tr>`).join('')}</table>`;
 }
-
 function renderResumo(){
-  const empresas=['Mood Mentoria','Pessoal'];
   let html='';
-  empresas.forEach(e=>{
+  ['Mood Mentoria','Pessoal'].forEach(e=>{
     const rec=state.transacoes.filter(t=>t.empresa===e&&t.tipo==='receita').reduce((a,t)=>a+t.valor,0);
     const desp=state.transacoes.filter(t=>t.empresa===e&&t.tipo==='despesa').reduce((a,t)=>a+t.valor,0);
-    if(rec===0&&desp===0) return;
+    if(!rec&&!desp) return;
     html+=`<div style="margin-bottom:14px">${empresaTag(e)}
       <div class="summary-row"><span>Receitas</span><span style="color:#0f6e56">${fmt(rec)}</span></div>
       <div class="summary-row"><span>Despesas</span><span style="color:#993c1d">${fmt(desp)}</span></div>
@@ -500,7 +545,6 @@ window.setTaskView = function(v){
   document.getElementById('vbtn-kanban').classList.toggle('active',v==='kanban');
   renderTasks();
 };
-
 window.addTask = async function(){
   const nome=document.getElementById('task-nome').value.trim();
   if(!nome){alert('Informe a tarefa.');return;}
@@ -510,19 +554,16 @@ window.addTask = async function(){
   ['task-nome','task-prazo','task-nota'].forEach(id=>document.getElementById(id).value='');
   toast('Tarefa salva ✓'); renderTasks();
 };
-
 window.delTask = async function(id){
   await deleteDoc(doc(db,'tasks',id));
   state.tasks=state.tasks.filter(t=>t.id!==id);
   toast('Removido'); renderTasks();
 };
-
 window.updateTaskStatus = async function(id,val){
   await updateDoc(doc(db,'tasks',id),{status:val});
   const t=state.tasks.find(t=>t.id===id); if(t) t.status=val;
   renderTasks();
 };
-
 function renderTasks(){
   const fe=document.getElementById('task-filtro-empresa').value;
   const fs=document.getElementById('task-filtro-status').value;
@@ -533,17 +574,13 @@ function renderTasks(){
   list.sort((a,b)=>smap[a.status]-smap[b.status]||pmap[a.prioridade]-pmap[b.prioridade]);
   if(taskView==='kanban'){
     const cols={aberto:list.filter(t=>t.status==='aberto'),fazendo:list.filter(t=>t.status==='fazendo'),feito:list.filter(t=>t.status==='feito')};
-    const colTitles={aberto:'⬜ Aberto',fazendo:'🔵 Fazendo',feito:'✅ Feito'};
+    const titles={aberto:'⬜ Aberto',fazendo:'🔵 Fazendo',feito:'✅ Feito'};
     body.innerHTML=`<div class="kanban">${Object.entries(cols).map(([k,items])=>`
       <div class="kanban-col">
-        <div class="kanban-col-title">${colTitles[k]} <span style="background:#fff;padding:1px 6px;border-radius:10px;font-size:11px">${items.length}</span></div>
+        <div class="kanban-col-title">${titles[k]} <span style="background:#fff;padding:1px 6px;border-radius:10px;font-size:11px">${items.length}</span></div>
         ${items.length?items.map(t=>`<div class="kanban-card">
           <div class="nome">${t.nome}</div>
-          <div class="meta">
-            ${empresaTag(t.empresa)}
-            <span class="badge ${t.prioridade}">${t.prioridade}</span>
-            ${t.prazo?`<span>📅 ${fmtDate(t.prazo)}</span>`:''}
-          </div>
+          <div class="meta">${empresaTag(t.empresa)}<span class="badge ${t.prioridade}">${t.prioridade}</span>${t.prazo?`<span>📅 ${fmtDate(t.prazo)}</span>`:''}</div>
           ${t.nota?`<div style="font-size:11px;color:#aaa;margin-top:4px">${t.nota}</div>`:''}
           <div style="margin-top:6px;display:flex;gap:4px">
             <select onchange="updateTaskStatus('${t.id}',this.value)" style="font-size:11px;padding:3px 5px;width:auto;flex:1">
@@ -553,15 +590,14 @@ function renderTasks(){
             </select>
             <button class="icon-btn" onclick="delTask('${t.id}')">✕</button>
           </div>
-        </div>`).join(''):`<div style="font-size:12px;color:#ccc;text-align:center;padding:12px 0">Vazio</div>`}
+        </div>`).join(''):'<div style="font-size:12px;color:#ccc;text-align:center;padding:12px 0">Vazio</div>'}
       </div>`).join('')}</div>`;
   } else {
     body.innerHTML=`<table>
       <tr><th>Tarefa</th><th>Empresa</th><th>Prioridade</th><th>Prazo</th><th>Status</th><th></th></tr>
       ${list.map(t=>`<tr>
         <td><div style="font-weight:500">${t.nome}</div>${t.nota?`<div style="font-size:11px;color:#aaa;margin-top:2px">${t.nota}</div>`:''}</td>
-        <td>${empresaTag(t.empresa)}</td>
-        <td><span class="badge ${t.prioridade}">${t.prioridade}</span></td>
+        <td>${empresaTag(t.empresa)}</td><td><span class="badge ${t.prioridade}">${t.prioridade}</span></td>
         <td style="font-size:12px;color:#888">${fmtDate(t.prazo)}</td>
         <td><select onchange="updateTaskStatus('${t.id}',this.value)" style="font-size:12px;padding:4px 6px;width:auto">
           <option value="aberto" ${t.status==='aberto'?'selected':''}>Aberto</option>
@@ -573,40 +609,29 @@ function renderTasks(){
   }
 }
 
-// ---- LANÇAMENTOS FUTUROS ----
+// ---- LANÇAMENTOS ----
 window.addLancamento = async function(){
   const desc=document.getElementById('lanc-desc').value.trim();
   const valor=parseFloat(document.getElementById('lanc-valor').value);
   const venc=document.getElementById('lanc-venc').value;
   if(!desc||isNaN(valor)||valor<=0||!venc){alert('Preencha descrição, valor e vencimento.');return;}
-  const tipo=document.getElementById('lanc-tipo').value;
-  const empresa=document.getElementById('lanc-empresa').value;
-  const nota=document.getElementById('lanc-nota').value.trim();
-  const obj={desc,empresa,tipo,valor,vencimento:venc,nota,quitado:false,criadoEm:Date.now()};
+  const obj={desc,empresa:document.getElementById('lanc-empresa').value,tipo:document.getElementById('lanc-tipo').value,valor,vencimento:venc,nota:document.getElementById('lanc-nota').value.trim(),quitado:false,criadoEm:Date.now()};
   const ref=await addDoc(collection(db,'lancamentos'),obj);
   state.lancamentos.unshift({id:ref.id,...obj});
   ['lanc-desc','lanc-valor','lanc-venc','lanc-nota'].forEach(id=>document.getElementById(id).value='');
-  toast('Lançamento salvo ✓ — Criando evento no Calendar...');
-  // Sinaliza para Claude criar o evento
-  const ev={desc,tipo,empresa,valor,vencimento:venc,nota};
-  window._pendingCalendarEvent=ev;
-  console.log('CALENDAR_EVENT:'+JSON.stringify(ev));
-  setTimeout(()=>toast('✅ Lançamento salvo! Peça ao Claude para criar o evento no Calendar.'),1500);
+  toast('✅ Lançamento salvo! Avise o Claude para criar o evento no Calendar.');
   renderLancamentos();
 };
-
 window.delLancamento = async function(id){
   await deleteDoc(doc(db,'lancamentos',id));
   state.lancamentos=state.lancamentos.filter(l=>l.id!==id);
   toast('Removido'); renderLancamentos();
 };
-
 window.quitarLancamento = async function(id){
   await updateDoc(doc(db,'lancamentos',id),{quitado:true});
   const l=state.lancamentos.find(l=>l.id===id); if(l) l.quitado=true;
   toast('Marcado como quitado ✓'); renderLancamentos();
 };
-
 function renderLancamentos(){
   const ft=document.getElementById('lanc-filtro-tipo').value;
   const fe=document.getElementById('lanc-filtro-empresa').value;
@@ -615,36 +640,30 @@ function renderLancamentos(){
     if(ft&&l.tipo!==ft) return false;
     if(fe&&l.empresa!==fe) return false;
     const st=statusLancamento(l);
-    if(fs==='pago'&&st!=='pago'&&st!=='recebido') return false;
+    if(fs==='quitado'&&st!=='pago'&&st!=='recebido') return false;
     if(fs==='pendente'&&st!=='pendente') return false;
     if(fs==='vencido'&&st!=='vencido') return false;
     return true;
-  });
-  list.sort((a,b)=>a.vencimento.localeCompare(b.vencimento));
-  if(!list.length){document.getElementById('lanc-body').innerHTML='<div class="empty">Nenhum lançamento.</div>';}
+  }).sort((a,b)=>a.vencimento.localeCompare(b.vencimento));
+  if(!list.length){ document.getElementById('lanc-body').innerHTML='<div class="empty">Nenhum lançamento.</div>'; }
   else {
     document.getElementById('lanc-body').innerHTML=`<table>
       <tr><th>Vencimento</th><th>Empresa</th><th>Descrição</th><th>Tipo</th><th style="text-align:right">Valor</th><th>Status</th><th></th></tr>
       ${list.map(l=>{
-        const st=statusLancamento(l);
-        const dias=diasAteVenc(l.vencimento);
-        const alerta=!l.quitado&&dias>=0&&dias<=3?`<span style="font-size:10px;color:#854f0b;font-weight:600"> ⚠ ${dias}d</span>`:'';
-        const vencAlert=!l.quitado&&dias<0?`<span style="font-size:10px;color:#c04828;font-weight:600"> ● ${Math.abs(dias)}d atrás</span>`:'';
+        const st=statusLancamento(l), dias=diasAteVenc(l.vencimento);
+        const al=!l.quitado&&dias>=0&&dias<=3?`<span style="font-size:10px;color:#854f0b;font-weight:600"> ⚠${dias}d</span>`:'';
+        const va=!l.quitado&&dias<0?`<span style="font-size:10px;color:#c04828;font-weight:600"> ●${Math.abs(dias)}d</span>`:'';
         return `<tr>
-          <td>${fmtDate(l.vencimento)}${alerta}${vencAlert}</td>
+          <td>${fmtDate(l.vencimento)}${al}${va}</td>
           <td>${empresaTag(l.empresa)}</td>
           <td>${l.desc}${l.nota?`<br><span style="font-size:11px;color:#aaa">${l.nota}</span>`:''}</td>
           <td><span class="badge ${l.tipo}">${l.tipo==='a-pagar'?'A Pagar':'A Receber'}</span></td>
           <td style="text-align:right;font-weight:600;color:${l.tipo==='a-receber'?'#0f6e56':'#993c1d'}">${fmt(l.valor)}</td>
           <td><span class="badge ${st}">${st}</span></td>
-          <td style="display:flex;gap:4px">
-            ${!l.quitado?`<button class="btn" style="font-size:11px;padding:3px 8px" onclick="quitarLancamento('${l.id}')">✓ Quitar</button>`:''}
-            <button class="icon-btn" onclick="delLancamento('${l.id}')">✕</button>
-          </td>
+          <td style="display:flex;gap:4px">${!l.quitado?`<button class="btn" style="font-size:11px;padding:3px 8px" onclick="quitarLancamento('${l.id}')">✓</button>`:''}<button class="icon-btn" onclick="delLancamento('${l.id}')">✕</button></td>
         </tr>`;
       }).join('')}</table>`;
   }
-  // Resumo
   const aRec=state.lancamentos.filter(l=>l.tipo==='a-receber'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
   const aPag=state.lancamentos.filter(l=>l.tipo==='a-pagar'&&!l.quitado).reduce((a,l)=>a+l.valor,0);
   const venc=state.lancamentos.filter(l=>!l.quitado&&diasAteVenc(l.vencimento)<0).length;
@@ -660,7 +679,6 @@ function render(){ renderFinanceiro(); renderTasks(); renderLancamentos(); rende
 document.getElementById('fin-data').value=new Date().toISOString().split('T')[0];
 document.getElementById('task-prazo').value=new Date().toISOString().split('T')[0];
 document.getElementById('lanc-venc').value=new Date().toISOString().split('T')[0];
-loadAll();
 </script>
 </body>
 </html>
